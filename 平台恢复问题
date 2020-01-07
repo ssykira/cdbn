@@ -1,0 +1,66 @@
+1.starting to crop sm_suctionthe point cloud...
+ 88 [INFO] [1569463301.254556]: starting to calculate the grasp pose...
+Q:这两句话在start to approaching the object之前
+
+---------------------
+2.
+	|--MoveToPosition   :home initial
+	|--sm_init_robot
+		|--InitCamera
+		|--InitScene
+		|--GripperAction  Reset
+		|--GripperAction  Active
+	|--sm_sense_pick
+		|-- sm_sense_planmove
+			|-- sm_sense
+				|-- sm_detectobj
+					|--DetectObj : 输出 ['cam_out', 'det_out']; 其中camera_out是相机本身源图像；det_out是2D视觉检测算法结果，格式为 [label_det, max_score, xmin, ymin, xmax, ymax]
+					|--ChangeHome
+				|-- sm_estpickingpose
+					|--EstPickingPose: 此处以相机的2D框进行3D点云crop，第一次计算出来target_moviet和target_movel；[starting to crop the point cloud];[starting to calculate the grasp pose]
+			|-- GripperAction
+			|-- PlanMove			 ：使用target_moviet & target_movel移动一下，没有涉及两个变量的重新计算和赋值。
+			|-- ChangeHome	
+		|--sm_pick
+			|--GripperAction:控制夹爪的开合
+		|--sm_suction
+			|--Suction				：Suck Object；
+			|--MoveAbove			：			；移动到抓取位置，userdata.target_moveit；
+			|--Suction				：Check Object；
+			|--sm_move_to_home_s
+
+	|--sm_place
+		|--MoveToPlace 	:[target_moveit]; 会移动到放置位置
+		|--GripperAction:[res_det]
+		|--Suction		:[res_det]
+		|--GripperAction:[res_det]
+		|--Suction		:[res_det]
+		|--ChangeHome
+	|--BackToHome
+
+
+
+2.暂停点：class_type与action_type  <joint name="tip_joint_1" type="fixed">
+    <!-- <origin rpy="0 0 0" xyz="-0.02009 0.07181 0.47061" />  -->
+    <origin rpy="0 ${M_PI/4} 0" xyz="0.17786 -0.00125 0.28750" />
+    <parent link="tool0" />
+  <child link="tip_link_1" />
+
+3.xy点的偏离原因
+
+4.motion_ctr出现的用法：
+	|--res_motion = self.motion_ctr(target=target_movel, 
+                                     manipulator=manipulator)
+	|--res_motion = self.motion_ctr(joint_pose=place_pose1, 
+                                     velocity=velocity, 
+                                     acceleration=acc)
+
+
+5.    <origin rpy="0 ${M_PI/4} 0" xyz="0.18009 0.00322 0.2679" />    下 右 后
+									   0.14009 0.01022 0.1979
+									   0.24009 -0.08022 0.2000
+									      -      +        -
+
+6.板擦找不到
+
+7.
